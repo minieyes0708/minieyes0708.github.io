@@ -10,13 +10,13 @@
             display: flex;
             justify-content: center;
             align-items: center;
-            height: 100vh;
             margin: 0;
             background-color: #f0f0f0;
         }
         #top-container {
             width: 400px;
             height: 500px;
+            margin-top: 10px;
             overflow: hidden;
             position: relative;
         }
@@ -128,6 +128,7 @@
         function startGame() {
             lastBrickTime = 0;
             answerInput.focus();
+            window.scrollTo(0, 0);
             startTime = new Date();
             submitButton.innerHTML = '提交';
             gameOver.style.display = 'none';
@@ -238,8 +239,9 @@
                 checkAnswer();
             }
         });
-        submitButton.addEventListener("click", startGame);
+
         answerInput.focus();
+        submitButton.addEventListener("click", startGame);
     </script>
 </body>
 </html>
