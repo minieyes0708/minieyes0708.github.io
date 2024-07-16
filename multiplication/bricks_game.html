@@ -91,7 +91,7 @@
         </div>
         <div>
             <input type="tel" id="answer-input" placeholder="輸入答案">
-            <button id="submit">提交</button>
+            <button id="submit">開始</button>
         </div>
     </div>
 
@@ -110,6 +110,21 @@
         let lastIncreaseSpeedTime = 0;
         const minBrickInterval = 1000;
 
+        function endGame() {
+            clearTimeout(gameLoop);
+            submitButton.innerHTML = '重來';
+            gameOver.style.display = 'flex';
+            
+            submit.addEventListener('click', startGame);
+            submit.removeEventListener('click', checkAnswer);
+            
+            const endTime = new Date();
+            const timeDiff = Math.floor((endTime - startTime) / 1000);
+            timeSurvived.textContent = `您撐了 ${timeDiff} 秒`;
+
+            bricks.forEach((brick, index) => { gameContainer.removeChild(brick); });
+            bricks = [];
+        }
         function startGame() {
             lastBrickTime = 0;
             answerInput.focus();
@@ -120,7 +135,44 @@
             submitButton.addEventListener('click', checkAnswer);
             submitButton.removeEventListener('click', startGame);
         }
+        function updateGame() {
+            let isEndGame = false;
+            bricks.forEach((brick, index) => {
+                const currentTop = parseInt(brick.style.top);
+                brick.style.top = `${currentTop + 5}px`;
 
+                if (currentTop > gameContainer.clientHeight - 30) {
+                    endGame();
+                    isEndGame = true;
+                }
+            });
+
+            if (!isEndGame) {
+                createBrick();
+                increaseSpeed();
+            }
+        }
+        function checkAnswer() {
+            let correctBrick = null;
+            let foundAnswer = false;
+            const userAnswer = parseInt(answerInput.value);
+
+            bricks.forEach((brick, index) => {
+                if (parseInt(brick.dataset.answer) === userAnswer) {
+                    if (correctBrick === null) {
+                        correctIndex = index;
+                        correctBrick = brick;
+                    }
+                }
+            });
+
+            answerInput.value = '';
+            if (correctBrick) {
+                bricks.splice(correctIndex, 1);
+                gameContainer.removeChild(correctBrick);
+            }
+            answerInput.focus();
+        }
         function createBrick() {
             if (bricks.length >= 5) return;
 
@@ -162,34 +214,6 @@
             lastBrickTime = currentTime;
             gameContainer.appendChild(brick);
         }
-
-        function isOverlapping(brick1, brick2) {
-            const rect1 = brick1.getBoundingClientRect();
-            const rect2 = brick2.getBoundingClientRect();
-            return !(rect1.right < rect2.left || 
-                     rect1.left > rect2.right || 
-                     rect1.bottom < rect2.top || 
-                     rect1.top > rect2.bottom);
-        }
-
-        function updateGame() {
-            let isEndGame = false;
-            bricks.forEach((brick, index) => {
-                const currentTop = parseInt(brick.style.top);
-                brick.style.top = `${currentTop + 5}px`;
-
-                if (currentTop > gameContainer.clientHeight - 30) {
-                    endGame();
-                    isEndGame = true;
-                }
-            });
-
-            if (!isEndGame) {
-                createBrick();
-                increaseSpeed();
-            }
-        }
-
         function increaseSpeed() {
             const elapsedTime = (new Date() - startTime) / 1000;
             if (elapsedTime > lastIncreaseSpeedTime + 1)
@@ -200,43 +224,13 @@
             clearTimeout(gameLoop);
             gameLoop = setTimeout(updateGame, gameSpeed);
         }
-
-        function checkAnswer() {
-            let correctBrick = null;
-            let foundAnswer = false;
-            const userAnswer = parseInt(answerInput.value);
-
-            bricks.forEach((brick, index) => {
-                if (parseInt(brick.dataset.answer) === userAnswer) {
-                    if (correctBrick === null) {
-                        correctIndex = index;
-                        correctBrick = brick;
-                    }
-                }
-            });
-
-            answerInput.value = '';
-            if (correctBrick) {
-                bricks.splice(correctIndex, 1);
-                gameContainer.removeChild(correctBrick);
-            }
-            answerInput.focus();
-        }
-
-        function endGame() {
-            clearTimeout(gameLoop);
-            submitButton.innerHTML = '重來';
-            gameOver.style.display = 'flex';
-            
-            submit.addEventListener('click', startGame);
-            submit.removeEventListener('click', checkAnswer);
-            
-            const endTime = new Date();
-            const timeDiff = Math.floor((endTime - startTime) / 1000);
-            timeSurvived.textContent = `您撐了 ${timeDiff} 秒`;
-
-            bricks.forEach((brick, index) => { gameContainer.removeChild(brick); });
-            bricks = [];
+        function isOverlapping(brick1, brick2) {
+            const rect1 = brick1.getBoundingClientRect();
+            const rect2 = brick2.getBoundingClientRect();
+            return !(rect1.right < rect2.left ||
+                     rect1.left > rect2.right ||
+                     rect1.bottom < rect2.top ||
+                     rect1.top > rect2.bottom);
         }
 
         answerInput.addEventListener('keypress', (e) => {
@@ -244,8 +238,7 @@
                 checkAnswer();
             }
         });
-
-        startGame();
+        submitButton.addEventListener("click", startGame);
         answerInput.focus();
     </script>
 </body>
