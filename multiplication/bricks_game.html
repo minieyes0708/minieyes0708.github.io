@@ -1,0 +1,252 @@
+<!DOCTYPE html>
+<html lang="zh-TW">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>數學磚塊遊戲</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            height: 100vh;
+            margin: 0;
+            background-color: #f0f0f0;
+        }
+        #top-container {
+            width: 400px;
+            height: 500px;
+            overflow: hidden;
+            position: relative;
+        }
+        #game-container {
+            width: 300px;
+            height: 400px;
+            border: 2px solid #333;
+            position: relative;
+            overflow: hidden;
+            background-color: #fff;
+        }
+        .brick {
+            position: absolute;
+            width: 60px;
+            height: 30px;
+            background-color: #3498db;
+            color: white;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            font-size: 14px;
+            border-radius: 5px;
+        }
+        #input-container {
+            position: relative;
+            bottom: 10px;
+            left: 50%;
+        }
+        #answer-input {
+            width: 100px;
+            height: 30px;
+            margin: 20px;
+            font-size: 16px;
+            text-align: center;
+        }
+        #game-over {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            display: none;
+            color: white;
+            font-size: 24px;
+            align-items: center;
+            flex-direction: column;
+            justify-content: center;
+            background-color: rgba(0, 0, 0, 0.7);
+        }
+        button {
+            width: 30%;
+            border: none;
+            padding: 10px;
+            color: white;
+            font-size: 16px;
+            cursor: pointer;
+            border-radius: 4px;
+            background-color: #4CAF50;
+        }
+        button:hover {
+            background-color: #45a049;
+        }
+    </style>
+</head>
+<body>
+    <div id="top-container">
+        <div id="game-container">
+            <div id="game-over">
+                <div>遊戲結束</div>
+                <div id="time-survived"></div>
+            </div>
+        </div>
+        <div>
+            <input type="tel" id="answer-input" placeholder="輸入答案">
+            <button id="submit">提交</button>
+        </div>
+    </div>
+
+    <script>
+        const gameOver = document.getElementById('game-over');
+        const submitButton = document.getElementById('submit');
+        const answerInput = document.getElementById('answer-input');
+        const timeSurvived = document.getElementById('time-survived');
+        const gameContainer = document.getElementById('game-container');
+
+        let gameLoop;
+        let startTime;
+        let bricks = [];
+        let gameSpeed = 100;
+        let lastBrickTime = 0;
+        let lastIncreaseSpeedTime = 0;
+        const minBrickInterval = 1000;
+
+        function startGame() {
+            lastBrickTime = 0;
+            answerInput.focus();
+            startTime = new Date();
+            submitButton.innerHTML = '提交';
+            gameOver.style.display = 'none';
+            gameLoop = setTimeout(updateGame, 0);
+            submitButton.addEventListener('click', checkAnswer);
+            submitButton.removeEventListener('click', startGame);
+        }
+
+        function createBrick() {
+            if (bricks.length >= 5) return;
+
+            const currentTime = new Date();
+            if (currentTime - lastBrickTime < minBrickInterval) return;
+
+            const brick = document.createElement('div');
+            brick.className = 'brick';
+            
+            let overlap;
+            let attempts = 0;
+            do {
+                overlap = false;
+                const x = Math.random() * (gameContainer.clientWidth - 60);
+                brick.style.top = '0px';
+                brick.style.left = `${x}px`;
+
+                for (let existingBrick of bricks) {
+                    if (isOverlapping(brick, existingBrick)) {
+                        overlap = true;
+                        break;
+                    }
+                }
+
+                attempts++;
+                if (attempts > 10) break;
+            } while (overlap);
+            if (overlap) return;
+
+            const num1 = Math.floor(Math.random() * 9) + 1;
+            const num2 = Math.floor(Math.random() * 9) + 1;
+            const question = `${num1} × ${num2}`;
+            const answer = num1 * num2;
+
+            brick.textContent = question;
+            brick.dataset.answer = answer;
+
+            bricks.push(brick);
+            lastBrickTime = currentTime;
+            gameContainer.appendChild(brick);
+        }
+
+        function isOverlapping(brick1, brick2) {
+            const rect1 = brick1.getBoundingClientRect();
+            const rect2 = brick2.getBoundingClientRect();
+            return !(rect1.right < rect2.left || 
+                     rect1.left > rect2.right || 
+                     rect1.bottom < rect2.top || 
+                     rect1.top > rect2.bottom);
+        }
+
+        function updateGame() {
+            let isEndGame = false;
+            bricks.forEach((brick, index) => {
+                const currentTop = parseInt(brick.style.top);
+                brick.style.top = `${currentTop + 5}px`;
+
+                if (currentTop > gameContainer.clientHeight - 30) {
+                    endGame();
+                    isEndGame = true;
+                }
+            });
+
+            if (!isEndGame) {
+                createBrick();
+                increaseSpeed();
+            }
+        }
+
+        function increaseSpeed() {
+            const elapsedTime = (new Date() - startTime) / 1000;
+            if (elapsedTime > lastIncreaseSpeedTime + 1)
+            {
+                gameSpeed -= 1;
+                lastIncreaseSpeedTime = elapsedTime;
+            }
+            clearTimeout(gameLoop);
+            gameLoop = setTimeout(updateGame, gameSpeed);
+        }
+
+        function checkAnswer() {
+            let correctBrick = null;
+            let foundAnswer = false;
+            const userAnswer = parseInt(answerInput.value);
+
+            bricks.forEach((brick, index) => {
+                if (parseInt(brick.dataset.answer) === userAnswer) {
+                    if (correctBrick === null) {
+                        correctIndex = index;
+                        correctBrick = brick;
+                    }
+                }
+            });
+
+            answerInput.value = '';
+            if (correctBrick) {
+                bricks.splice(correctIndex, 1);
+                gameContainer.removeChild(correctBrick);
+            }
+            answerInput.focus();
+        }
+
+        function endGame() {
+            clearTimeout(gameLoop);
+            submitButton.innerHTML = '重來';
+            gameOver.style.display = 'flex';
+            
+            submit.addEventListener('click', startGame);
+            submit.removeEventListener('click', checkAnswer);
+            
+            const endTime = new Date();
+            const timeDiff = Math.floor((endTime - startTime) / 1000);
+            timeSurvived.textContent = `您撐了 ${timeDiff} 秒`;
+
+            bricks.forEach((brick, index) => { gameContainer.removeChild(brick); });
+            bricks = [];
+        }
+
+        answerInput.addEventListener('keypress', (e) => {
+            if (e.key === 'Enter') {
+                checkAnswer();
+            }
+        });
+
+        startGame();
+        answerInput.focus();
+    </script>
+</body>
+</html>
