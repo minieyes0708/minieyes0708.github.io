@@ -15,7 +15,7 @@
         }
         #top-container {
             width: 400px;
-            height: 500px;
+            /* height: 500px; */
             margin-top: 10px;
             overflow: hidden;
             position: relative;
@@ -46,6 +46,13 @@
             left: 50%;
         }
         #answer-input {
+            width: 100px;
+            height: 30px;
+            margin: 20px;
+            font-size: 16px;
+            text-align: center;
+        }
+        #game-speed {
             width: 100px;
             height: 30px;
             margin: 20px;
@@ -93,6 +100,9 @@
             <input type="tel" id="answer-input" placeholder="輸入答案">
             <button id="submit">開始</button>
         </div>
+        <div id="settings-container">
+            Game Speed <input type="tel" id="game-speed" value="100">
+        </div>
     </div>
 
     <script>
@@ -107,8 +117,8 @@
         let bricks = [];
         let gameSpeed = 100;
         let lastBrickTime = 0;
+        let minBrickInterval = 1000;
         let lastIncreaseSpeedTime = 0;
-        const minBrickInterval = 1000;
 
         function endGame() {
             clearTimeout(gameLoop);
@@ -135,6 +145,8 @@
             gameLoop = setTimeout(updateGame, 0);
             submitButton.addEventListener('click', checkAnswer);
             submitButton.removeEventListener('click', startGame);
+            gameSpeed = parseFloat(document.getElementById('game-speed').value);
+            minBrickInterval = parseFloat(document.getElementById('game-speed').value) * 10;
         }
         function updateGame() {
             let isEndGame = false;
@@ -234,14 +246,13 @@
                      rect1.top > rect2.bottom);
         }
 
+        answerInput.focus();
+        submitButton.addEventListener("click", startGame);
         answerInput.addEventListener('keypress', (e) => {
             if (e.key === 'Enter') {
                 checkAnswer();
             }
         });
-
-        answerInput.focus();
-        submitButton.addEventListener("click", startGame);
     </script>
 </body>
 </html>
