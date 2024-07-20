@@ -52,10 +52,10 @@
             font-size: 16px;
             text-align: center;
         }
-        #game-speed {
+        .setting-input {
             width: 100px;
-            height: 30px;
-            margin: 20px;
+            height: 20px;
+            margin: 10px;
             font-size: 16px;
             text-align: center;
         }
@@ -101,7 +101,19 @@
             <button id="submit">開始</button>
         </div>
         <div id="settings-container">
-            Game Speed <input type="tel" id="game-speed" value="100">
+            <table>
+                <tr>
+                    <td>Game Speed</td>
+                    <td><input type="tel" id="game-speed" class="setting-input" value="100"></td>
+                </tr>
+                <tr>
+                    <td>Num1 Start</td>
+                    <td><input type="tel" id="num1-start" class="setting-input" value="1"></tr></td>
+                <tr>
+                    <td>Num1 End</td>
+                    <td><input type="tel" id="num1-end" class="setting-input" value="9"></td>
+                </tr>
+            </table>
         </div>
     </div>
 
@@ -115,6 +127,8 @@
         let gameLoop;
         let startTime;
         let bricks = [];
+        let num1_end = 9;
+        let num1_start = 1;
         let gameSpeed = 100;
         let lastBrickTime = 0;
         let minBrickInterval = 1000;
@@ -145,6 +159,8 @@
             gameLoop = setTimeout(updateGame, 0);
             submitButton.addEventListener('click', checkAnswer);
             submitButton.removeEventListener('click', startGame);
+            num1_end = parseInt(document.getElementById('num1-end').value);
+            num1_start = parseInt(document.getElementById('num1-start').value);
             gameSpeed = parseFloat(document.getElementById('game-speed').value);
             minBrickInterval = parseFloat(document.getElementById('game-speed').value) * 10;
         }
@@ -215,7 +231,7 @@
             } while (overlap);
             if (overlap) return;
 
-            const num1 = Math.floor(Math.random() * 9) + 1;
+            const num1 = Math.floor(Math.random() * (num1_end - num1_start + 1)) + num1_start;
             const num2 = Math.floor(Math.random() * 9) + 1;
             const question = `${num1} × ${num2}`;
             const answer = num1 * num2;
