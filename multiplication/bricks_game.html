@@ -116,19 +116,29 @@
             </table>
         </div>
         <div id="sound-container">
-            <audio id="bang-sound" src="/sounds/bang.mp3" preload="auto"></audio>
+            <audio id="bang-sound0" src="/sounds/bang.mp3" preload="auto"></audio>
+            <audio id="bang-sound1" src="/sounds/bang.mp3" preload="auto"></audio>
             <audio id="bang-sound2" src="/sounds/bang.mp3" preload="auto"></audio>
+            <audio id="bang-sound3" src="/sounds/bang.mp3" preload="auto"></audio>
+            <audio id="bang-sound4" src="/sounds/bang.mp3" preload="auto"></audio>
+            <audio id="bang-sound5" src="/sounds/bang.mp3" preload="auto"></audio>
+            <audio id="bang-sound6" src="/sounds/bang.mp3" preload="auto"></audio>
+            <audio id="bang-sound7" src="/sounds/bang.mp3" preload="auto"></audio>
+            <audio id="bang-sound8" src="/sounds/bang.mp3" preload="auto"></audio>
+            <audio id="bang-sound9" src="/sounds/bang.mp3" preload="auto"></audio>
         </div>
     </div>
 
     <script>
         const gameOver = document.getElementById('game-over');
         const submitButton = document.getElementById('submit');
-        const bang_sound = document.getElementById('bang-sound');
-        const bang_sound2 = document.getElementById('bang-sound2');
         const answerInput = document.getElementById('answer-input');
         const timeSurvived = document.getElementById('time-survived');
         const gameContainer = document.getElementById('game-container');
+
+        let bang_sounds = []
+        for (let i = 0; i < 10; i++)
+            bang_sounds.push(document.getElementById(`bang-sound${i}`));
 
         let gameLoop;
         let startTime;
@@ -171,21 +181,13 @@
             minBrickInterval = parseFloat(document.getElementById('game-speed').value) * 10;
         }
         function play_bang() {
-            if (current_bang_sound_source === 0) {
-                bang_sound.play();
-                setTimeout(() => {
-                    bang_sound.pause();
-                    bang_sound.currentTime = 0;
-                }, 600);
-                current_bang_sound_source = 1;
-            } else {
-                bang_sound2.play();
-                setTimeout(() => {
-                    bang_sound2.pause();
-                    bang_sound2.currentTime = 0;
-                }, 600);
-                current_bang_sound_source = 0;
-            }
+            bang_sounds[current_bang_sound_source].play();
+            setTimeout(() => {
+                bang_sounds[current_bang_sound_source].pause();
+                bang_sounds[current_bang_sound_source].currentTime = 0;
+            }, 1000);
+            current_bang_sound_source += 1;
+            if (current_bang_sound_source >= bang_sounds.length) current_bang_sound_source = 0;
         }
         function updateGame() {
             let isEndGame = false;
