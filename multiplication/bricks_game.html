@@ -115,11 +115,15 @@
                 </tr>
             </table>
         </div>
+        <div id="sound-container">
+            <audio id="bang-sound" src="/sounds/bang.mp3"></audio>
+        </div>
     </div>
 
     <script>
         const gameOver = document.getElementById('game-over');
         const submitButton = document.getElementById('submit');
+        const bang_sound = document.getElementById('bang-sound');
         const answerInput = document.getElementById('answer-input');
         const timeSurvived = document.getElementById('time-survived');
         const gameContainer = document.getElementById('game-container');
@@ -197,8 +201,10 @@
 
             answerInput.value = '';
             if (correctBrick) {
+                bang_sound.pause();
+                bang_sound.currentTime = 0;
+                bang_sound.play();
                 bricks.splice(correctIndex, 1);
-                new Audio('/sounds/bang.mp3').play();
                 gameContainer.removeChild(correctBrick);
             }
             answerInput.focus();
