@@ -198,6 +198,7 @@
             answerInput.value = '';
             if (correctBrick) {
                 bricks.splice(correctIndex, 1);
+                new Audio('../sounds/bang.mp3').play();
                 gameContainer.removeChild(correctBrick);
             }
             answerInput.focus();
