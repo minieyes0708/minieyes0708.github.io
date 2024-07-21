@@ -156,7 +156,6 @@
         function startGame() {
             lastBrickTime = 0;
             answerInput.focus();
-            window.scrollTo(0, 0);
             startTime = new Date();
             submitButton.innerHTML = '提交';
             gameOver.style.display = 'none';
@@ -271,6 +270,9 @@
 
         answerInput.focus();
         submitButton.addEventListener("click", startGame);
+        answerInput.addEventListener('onfocus', (e) => {
+            window.scrollTo(0, 0);
+        });
         answerInput.addEventListener('keypress', (e) => {
             if (e.key === 'Enter') {
                 checkAnswer();
